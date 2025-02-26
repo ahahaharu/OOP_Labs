@@ -12,8 +12,8 @@ const menu = `
 1. Нарисовать прямоугольник
 2. Нарисовать линию
 3. Нарисовать круг
-4. Переместить конкретную фигуру
-5. Очистить конкретную фигуру
+4. Переместить фигуру
+5. Очистить фигуру
 6. Очистить холст
 7. Отменить действие
 8. Повторить отменённое действие
@@ -50,6 +50,13 @@ async function mainLoop(paint) {
         break;
       }
       case "4": {
+        paint.displayShapes();
+        const index = parseInt(
+          await promptInput("Введите индекс фигуры для перемещения: ")
+        );
+        const dx = parseInt(await promptInput("Сдвиг по горизонтали (dx): "));
+        const dy = parseInt(await promptInput("Сдвиг по вертикали (dy): "));
+        paint.moveShape(index, dx, dy);
         break;
       }
       case "5": {

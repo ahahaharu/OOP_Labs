@@ -28,6 +28,19 @@ class ConsolePaint {
     this.display();
   }
 
+  moveShape(index, dx, dy) {
+    if (index < 0 || index >= this.shapes.length) {
+      console.log("Неверный индекс фигуры");
+      return;
+    }
+    this.saveState();
+    const shape = this.shapes[index];
+    shape.erase(this.canvas, this.width, this.height);
+    shape.move(dx, dy);
+    shape.draw(this.canvas, this.width, this.height);
+    this.display();
+  }
+
   clearShape(index) {
     this.saveState();
     this.shapes[index].erase(this.canvas, this.width, this.height);
