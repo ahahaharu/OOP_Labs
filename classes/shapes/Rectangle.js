@@ -29,7 +29,7 @@ class Rectangle extends Shape {
   }
 
   toString() {
-    return `Прямоугольник (${this.x}, ${this.y}), ширина: ${this.w}, высота: ${this.h}, заливка: ${this.fill}`;
+    return `Прямоугольник (${this.x}, ${this.y}), ширина: ${this.width}, высота: ${this.height}, заливка: ${this.fill}`;
   }
 }
 

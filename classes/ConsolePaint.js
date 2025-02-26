@@ -30,7 +30,7 @@ class ConsolePaint {
 
   clearShape(index) {
     this.saveState();
-    this.shapes[index].clear(this.canvas, this.width, this.height);
+    this.shapes[index].erase(this.canvas, this.width, this.height);
     this.shapes.splice(index, 1);
     this.display();
   }

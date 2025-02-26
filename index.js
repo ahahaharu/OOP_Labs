@@ -46,6 +46,23 @@ async function mainLoop(paint) {
         paint.drawShape(new Rectangle(x, y, w, h, fill));
         break;
       }
+      case "3": {
+        break;
+      }
+      case "4": {
+        break;
+      }
+      case "5": {
+        paint.displayShapes();
+        const index = parseInt(
+          await promptInput("Введите индекс фигуры для очистки: ")
+        );
+        paint.clearShape(index);
+        break;
+      }
+      case "6": {
+        break;
+      }
     }
   }
 }
