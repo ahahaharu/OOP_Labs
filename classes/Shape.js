@@ -1,13 +1,15 @@
-export default class Shape {
+class Shape {
   constructor(x, y, fill = "*") {
     this.x = x;
     this.y = y;
     this.fill = fill;
   }
 
-  draw() {}
+  draw(canvas, canvasWidth, canvasHeight) {}
 
-  move() {}
+  move(dx, dy) {}
 
-  erase() {}
+  erase(canvas, canvasWidth, canvasHeight) {}
 }
+
+module.exports = Shape;
