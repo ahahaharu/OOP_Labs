@@ -76,6 +76,17 @@ class ConsolePaint {
       console.log(`${index}: ${shape.toString()}`);
     });
   }
+
+  undo() {
+    if (this.history.length > 0) {
+      this.redoStack.push(JSON.stringify(this.canvas));
+      this.canvas = JSON.parse(this.history.pop());
+      if (this.shapes.length > 0) {
+        this.shapes.pop();
+      }
+      this.display();
+    }
+  }
 }
 
 module.exports = ConsolePaint;

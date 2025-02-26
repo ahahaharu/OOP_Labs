@@ -70,6 +70,10 @@ async function mainLoop(paint) {
       case "6": {
         break;
       }
+      case "7": {
+        paint.undo();
+        break;
+      }
     }
   }
 }
