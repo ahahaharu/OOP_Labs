@@ -74,6 +74,10 @@ async function mainLoop(paint) {
         paint.undo();
         break;
       }
+      case "8": {
+        paint.redo();
+        break;
+      }
     }
   }
 }

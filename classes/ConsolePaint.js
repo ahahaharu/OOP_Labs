@@ -48,6 +48,15 @@ class ConsolePaint {
     this.display();
   }
 
+  clear() {
+    this.saveState();
+    this.canvas = Array(this.height)
+      .fill()
+      .map(() => Array(this.width).fill(" "));
+    this.shapes = [];
+    this.display();
+  }
+
   save(filename) {
     const fs = require("fs");
     fs.writeFileSync(filename, JSON.stringify(this.canvas));
@@ -84,6 +93,14 @@ class ConsolePaint {
       if (this.shapes.length > 0) {
         this.shapes.pop();
       }
+      this.display();
+    }
+  }
+
+  redo() {
+    if (this.redoStack.length > 0) {
+      this.history.push(JSON.stringify(this.canvas));
+      this.canvas = JSON.parse(this.redoStack.pop());
       this.display();
     }
   }
