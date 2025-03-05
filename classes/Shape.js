@@ -10,6 +10,8 @@ class Shape {
   move(dx, dy) {}
 
   erase(canvas, canvasWidth, canvasHeight) {}
+
+  toJSON() {}
 }
 
 module.exports = Shape;

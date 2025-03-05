@@ -1,3 +1,5 @@
+const Rectangle = require("./shapes/Rectangle");
+
 class ConsolePaint {
   constructor(width = 100, height = 30) {
     this.width = width;
@@ -16,9 +18,23 @@ class ConsolePaint {
     this.canvas.forEach((row) => console.log(row.join("")));
   }
 
+  drawAll() {
+    this.canvas = Array(this.height)
+      .fill()
+      .map(() => Array(this.width).fill(" "));
+    for (const shape of this.shapes) {
+      shape.draw(this.canvas, this.width, this.height);
+    }
+    this.display();
+  }
+
   saveState() {
-    this.history.push(JSON.stringify(this.canvas));
-    this.redoStack = [];
+    // Сохраняем текущее состояние холста и фигур
+    this.history.push({
+      canvas: JSON.stringify(this.canvas),
+      shapes: [...this.shapes], // Копируем массив фигур
+    });
+    this.redoStack = []; // Очищаем redo-стек при новом действии
   }
 
   drawShape(shape) {
@@ -35,17 +51,21 @@ class ConsolePaint {
     }
     this.saveState();
     const shape = this.shapes[index];
-    shape.erase(this.canvas, this.width, this.height);
+    // shape.erase(this.canvas, this.width, this.height);
     shape.move(dx, dy);
-    shape.draw(this.canvas, this.width, this.height);
-    this.display();
+    this.drawAll();
+    // shape.draw(this.canvas, this.width, this.height);
+    // this.display();
   }
 
   clearShape(index) {
+    if (index < 0 || index >= this.shapes.length) {
+      console.log("Неверный индекс фигуры");
+      return;
+    }
     this.saveState();
-    this.shapes[index].erase(this.canvas, this.width, this.height);
     this.shapes.splice(index, 1);
-    this.display();
+    this.drawAll();
   }
 
   clear() {
@@ -59,19 +79,35 @@ class ConsolePaint {
 
   save(filename) {
     const fs = require("fs");
-    fs.writeFileSync(filename, JSON.stringify(this.canvas));
+    const shapesData = this.shapes.map((shape) => shape.toJSON());
+    fs.writeFileSync(filename, JSON.stringify(shapesData));
     console.log(`Сохранено в ${filename}`);
   }
 
   load(filename) {
     const fs = require("fs");
+    const Rectangle = require("./shapes/Rectangle"); // Подключаем Rectangle
+    const Circle = require("./shapes/Circle"); // Подключаем Circle
     try {
       this.saveState();
-      this.canvas = JSON.parse(fs.readFileSync(filename, "utf8"));
-      this.shapes = [];
-      this.display();
+      const shapesData = JSON.parse(fs.readFileSync(filename, "utf8"));
+      this.shapes = shapesData.map((data) => {
+        if (data.type === "Rectangle") {
+          return new Rectangle(
+            data.x,
+            data.y,
+            data.width,
+            data.height,
+            data.fill
+          );
+        } else if (data.type === "Circle") {
+          return new Circle(data.x, data.y, data.radius, data.fill);
+        }
+        throw new Error("Неизвестный тип фигуры");
+      });
+      this.drawAll();
     } catch (e) {
-      console.log("Ошибка при загрузке файла!");
+      console.log("Ошибка при загрузке файла: " + e.message);
     }
   }
 
@@ -88,19 +124,30 @@ class ConsolePaint {
 
   undo() {
     if (this.history.length > 0) {
-      this.redoStack.push(JSON.stringify(this.canvas));
-      this.canvas = JSON.parse(this.history.pop());
-      if (this.shapes.length > 0) {
-        this.shapes.pop();
-      }
+      // Сохраняем текущее состояние в redo-стек
+      this.redoStack.push({
+        canvas: JSON.stringify(this.canvas),
+        shapes: [...this.shapes],
+      });
+      // Восстанавливаем предыдущее состояние
+      const previousState = this.history.pop();
+      this.canvas = JSON.parse(previousState.canvas);
+      this.shapes = [...previousState.shapes]; // Восстанавливаем массив фигур
       this.display();
     }
   }
 
   redo() {
     if (this.redoStack.length > 0) {
-      this.history.push(JSON.stringify(this.canvas));
-      this.canvas = JSON.parse(this.redoStack.pop());
+      // Сохраняем текущее состояние в историю
+      this.history.push({
+        canvas: JSON.stringify(this.canvas),
+        shapes: [...this.shapes],
+      });
+      // Восстанавливаем следующее состояние
+      const nextState = this.redoStack.pop();
+      this.canvas = JSON.parse(nextState.canvas);
+      this.shapes = [...nextState.shapes]; // Восстанавливаем массив фигур
       this.display();
     }
   }

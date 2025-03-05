@@ -1,4 +1,5 @@
 const ConsolePaint = require("./classes/ConsolePaint");
+const Circle = require("./classes/shapes/Circle");
 const Rectangle = require("./classes/shapes/Rectangle");
 
 const readline = require("readline").createInterface({
@@ -47,6 +48,13 @@ async function mainLoop(paint) {
         break;
       }
       case "3": {
+        const x = parseInt(await promptInput("Введите x центра: "));
+        const y = parseInt(await promptInput("Введите y центра: "));
+        const r = parseInt(await promptInput("Введите радиус: "));
+        const fill =
+          (await promptInput("Введите символ заливки (по умолчанию *): ")) ||
+          "*";
+        paint.drawShape(new Circle(x, y, r, fill));
         break;
       }
       case "4": {
@@ -68,6 +76,7 @@ async function mainLoop(paint) {
         break;
       }
       case "6": {
+        paint.clear();
         break;
       }
       case "7": {
@@ -78,6 +87,31 @@ async function mainLoop(paint) {
         paint.redo();
         break;
       }
+      case "9": {
+        const filename =
+          (await promptInput(
+            "Введите имя файла (по умолчанию canvas.json): "
+          )) || "canvas.json";
+        paint.save(filename);
+        break;
+      }
+      case "10": {
+        const filename = await promptInput("Введите имя файла: ");
+        paint.load(filename);
+        break;
+      }
+      case "11": {
+        paint.displayShapes();
+        await promptInput("");
+        break;
+      }
+      case "12": {
+        console.log("Программа завершена!");
+        readline.close();
+        return;
+      }
+      default:
+        console.log("Неверный выбор! Введите число от 1 до 12.");
     }
   }
 }
