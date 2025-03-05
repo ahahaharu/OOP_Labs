@@ -2,7 +2,7 @@ const Shape = require("../Shape");
 
 class Line extends Shape {
   constructor(x1, y1, x2, y2, fill = "*") {
-    super(x1, y1, fill); // x1, y1 как начальная точка для Shape
+    super(x1, y1, fill);
     this.x1 = x1;
     this.y1 = y1;
     this.x2 = x2;
@@ -18,16 +18,15 @@ class Line extends Shape {
 
     const dx = Math.abs(x2 - x1);
     const dy = Math.abs(y2 - y1);
-    const sx = x1 < x2 ? 1 : -1; // Шаг по X
-    const sy = y1 < y2 ? 1 : -1; // Шаг по Y
+    const sx = x1 < x2 ? 1 : -1;
+    const sy = y1 < y2 ? 1 : -1;
     let err = dx - dy;
 
     while (true) {
-      // Проверяем границы холста
       if (x1 >= 0 && x1 < canvasWidth && y1 >= 0 && y1 < canvasHeight) {
         canvas[y1][x1] = this.fill;
       }
-      if (x1 === x2 && y1 === y2) break; // Дошли до конца линии
+      if (x1 === x2 && y1 === y2) break;
       const e2 = 2 * err;
       if (e2 > -dy) {
         err -= dy;
@@ -40,7 +39,6 @@ class Line extends Shape {
     }
   }
 
-  // Перемещение линии
   move(dx, dy) {
     this.x1 += dx;
     this.y1 += dy;
@@ -48,7 +46,6 @@ class Line extends Shape {
     this.y2 += dy;
   }
 
-  // Стирание линии
   erase(canvas, canvasWidth, canvasHeight) {
     let x1 = this.x1;
     let y1 = this.y1;
@@ -78,7 +75,6 @@ class Line extends Shape {
     }
   }
 
-  // Сериализация в JSON
   toJSON() {
     return {
       type: "Line",
@@ -90,7 +86,6 @@ class Line extends Shape {
     };
   }
 
-  // Строковое представление
   toString() {
     return `Линия от (${this.x1}, ${this.y1}) до (${this.x2}, ${this.y2}), заливка: ${this.fill}`;
   }

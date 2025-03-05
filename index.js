@@ -1,6 +1,7 @@
 const ConsolePaint = require("./classes/ConsolePaint");
-const Circle = require("./classes/shapes/Circle");
 const Rectangle = require("./classes/shapes/Rectangle");
+const Circle = require("./classes/shapes/Circle");
+const Line = require("./classes/shapes/Line");
 
 const readline = require("readline").createInterface({
   input: process.stdin,
@@ -37,23 +38,103 @@ async function mainLoop(paint) {
     switch (choice) {
       case "1": {
         const x = parseInt(await promptInput("Введите x: "));
+        if (isNaN(x)) {
+          console.log("Ошибка: x должен быть числом!");
+          await promptInput("Нажмите Enter для продолжения...");
+          break;
+        }
         const y = parseInt(await promptInput("Введите y: "));
+        if (isNaN(y)) {
+          console.log("Ошибка: y должен быть числом!");
+          await promptInput("Нажмите Enter для продолжения...");
+          break;
+        }
         const w = parseInt(await promptInput("Введите ширину: "));
+        if (isNaN(w) || w <= 0) {
+          console.log("Ошибка: ширина должна быть положительным числом!");
+          await promptInput("Нажмите Enter для продолжения...");
+          break;
+        }
         const h = parseInt(await promptInput("Введите высоту: "));
-
+        if (isNaN(h) || h <= 0) {
+          console.log("Ошибка: высота должна быть положительным числом!");
+          await promptInput("Нажмите Enter для продолжения...");
+          break;
+        }
         const fill =
           (await promptInput("Введите символ заливки (по умолчанию *): ")) ||
           "*";
+        if (fill.length !== 1) {
+          console.log("Ошибка: символ заливки должен быть одним символом!");
+          await promptInput("Нажмите Enter для продолжения...");
+          break;
+        }
         paint.drawShape(new Rectangle(x, y, w, h, fill));
+        break;
+      }
+      case "2": {
+        const x1 = parseInt(await promptInput("Введите x1: "));
+        if (isNaN(x1)) {
+          console.log("Ошибка: x1 должен быть числом!");
+          await promptInput("Нажмите Enter для продолжения...");
+          break;
+        }
+        const y1 = parseInt(await promptInput("Введите y1: "));
+        if (isNaN(y1)) {
+          console.log("Ошибка: y1 должен быть числом!");
+          await promptInput("Нажмите Enter для продолжения...");
+          break;
+        }
+        const x2 = parseInt(await promptInput("Введите x2: "));
+        if (isNaN(x2)) {
+          console.log("Ошибка: x2 должен быть числом!");
+          await promptInput("Нажмите Enter для продолжения...");
+          break;
+        }
+        const y2 = parseInt(await promptInput("Введите y2: "));
+        if (isNaN(y2)) {
+          console.log("Ошибка: y2 должен быть числом!");
+          await promptInput("Нажмите Enter для продолжения...");
+          break;
+        }
+        const fill =
+          (await promptInput("Введите символ заливки (по умолчанию *): ")) ||
+          "*";
+        if (fill.length !== 1) {
+          console.log("Ошибка: символ заливки должен быть одним символом!");
+          await promptInput("Нажмите Enter для продолжения...");
+          break;
+        }
+        paint.drawShape(new Line(x1, y1, x2, y2, fill));
         break;
       }
       case "3": {
         const x = parseInt(await promptInput("Введите x центра: "));
+        if (isNaN(x)) {
+          console.log("Ошибка: x должен быть числом!");
+          await promptInput("Нажмите Enter для продолжения...");
+          break;
+        }
         const y = parseInt(await promptInput("Введите y центра: "));
+        if (isNaN(y)) {
+          console.log("Ошибка: y должен быть числом!");
+          await promptInput("Нажмите Enter для продолжения...");
+          break;
+        }
         const r = parseInt(await promptInput("Введите радиус: "));
+        if (isNaN(r) || r <= 0) {
+          console.log("Ошибка: радиус должен быть положительным числом!");
+          await promptInput("Нажмите Enter для продолжения...");
+          break;
+        }
         const fill =
           (await promptInput("Введите символ заливки (по умолчанию *): ")) ||
           "*";
+        if (fill.length !== 1) {
+          console.log("Ошибка: символ заливки должен быть одним символом!");
+          await promptInput("Нажмите Enter для продолжения...");
+          break;
+        }
         paint.drawShape(new Circle(x, y, r, fill));
         break;
       }
@@ -62,8 +143,25 @@ async function mainLoop(paint) {
         const index = parseInt(
           await promptInput("Введите индекс фигуры для перемещения: ")
         );
+        if (isNaN(index) || index < 0 || index >= paint.shapes.length) {
+          console.log(
+            "Ошибка: индекс должен быть числом в пределах списка фигур!"
+          );
+          await promptInput("Нажмите Enter для продолжения...");
+          break;
+        }
         const dx = parseInt(await promptInput("Сдвиг по горизонтали (dx): "));
+        if (isNaN(dx)) {
+          console.log("Ошибка: сдвиг по горизонтали должен быть числом!");
+          await promptInput("Нажмите Enter для продолжения...");
+          break;
+        }
         const dy = parseInt(await promptInput("Сдвиг по вертикали (dy): "));
+        if (isNaN(dy)) {
+          console.log("Ошибка: сдвиг по вертикали должен быть числом!");
+          await promptInput("Нажмите Enter для продолжения...");
+          break;
+        }
         paint.moveShape(index, dx, dy);
         break;
       }
@@ -72,6 +170,13 @@ async function mainLoop(paint) {
         const index = parseInt(
           await promptInput("Введите индекс фигуры для очистки: ")
         );
+        if (isNaN(index) || index < 0 || index >= paint.shapes.length) {
+          console.log(
+            "Ошибка: индекс должен быть числом в пределах списка фигур!"
+          );
+          await promptInput("Нажмите Enter для продолжения...");
+          break;
+        }
         paint.clearShape(index);
         break;
       }
@@ -92,17 +197,26 @@ async function mainLoop(paint) {
           (await promptInput(
             "Введите имя файла (по умолчанию canvas.json): "
           )) || "canvas.json";
+        if (!filename) {
+          console.log("Ошибка: имя файла не может быть пустым!");
+          break;
+        }
         paint.save(filename);
         break;
       }
       case "10": {
         const filename = await promptInput("Введите имя файла: ");
+        if (!filename) {
+          console.log("Ошибка: имя файла не может быть пустым!");
+          await promptInput("Нажмите Enter для продолжения...");
+          break;
+        }
         paint.load(filename);
         break;
       }
       case "11": {
         paint.displayShapes();
-        await promptInput("");
+        await promptInput("Нажмите Enter для продолжения...");
         break;
       }
       case "12": {
@@ -112,6 +226,7 @@ async function mainLoop(paint) {
       }
       default:
         console.log("Неверный выбор! Введите число от 1 до 12.");
+        await promptInput("Нажмите Enter для продолжения...");
     }
   }
 }
