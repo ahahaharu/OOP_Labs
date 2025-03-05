@@ -74,21 +74,31 @@ class ConsolePaint {
   }
 
   save(filename) {
+    const match = filename.match(".json");
+    if (!match) {
+      filename += ".json";
+    }
     const fs = require("fs");
     const shapesData = this.shapes.map((shape) => shape.toJSON());
-    fs.writeFileSync(filename, JSON.stringify(shapesData));
+    fs.writeFileSync(`./saves/${filename}`, JSON.stringify(shapesData));
     console.log(`Сохранено в ${filename}`);
   }
 
   load(filename) {
+    const match = filename.match(".json");
+    if (!match) {
+      filename += ".json";
+    }
     const fs = require("fs");
     const Rectangle = require("./shapes/Rectangle");
     const Circle = require("./shapes/Circle");
     const Line = require("./shapes/Line");
     try {
       this.saveState();
-      const shapesData = JSON.parse(fs.readFileSync(filename, "utf8"));
-      this.shapes = shapesData.map((data) => {
+      const shapesData = JSON.parse(
+        fs.readFileSync(`./saves/${filename}`, "utf8")
+      );
+      this.shapes = shapesData?.map((data) => {
         if (data.type === "Rectangle") {
           return new Rectangle(
             data.x,
