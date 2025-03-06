@@ -58,7 +58,7 @@ class Circle extends Shape {
   }
 
   toString() {
-    return `Круг с центром (${this.x}, ${this.y}), радиус: ${this.radius}, заливка: ${this.fill}`;
+    return `Круг (${this.x}, ${this.y}), радиус: ${this.radius}, заливка: ${this.fill}`;
   }
 }
 
