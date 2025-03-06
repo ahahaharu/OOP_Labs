@@ -32,6 +32,16 @@ function promptInput(question) {
 async function tapToContinue() {
   await promptInput("Нажмите Enter, чтобы продолжить...");
 }
+async function promptIntegerInput(question) {
+  while (true) {
+    const input = await promptInput(question);
+    const parsed = parseInt(input);
+    if (!isNaN(parsed)) {
+      return parsed;
+    }
+    console.log("Ошибка: введите целое число!");
+  }
+}
 
 async function mainLoop(paint) {
   while (true) {
@@ -41,26 +51,16 @@ async function mainLoop(paint) {
 
     switch (choice) {
       case "1": {
-        const x = parseInt(await promptInput("Введите x: "));
-        if (isNaN(x)) {
-          console.log("Ошибка: x должен быть числом!");
-          await tapToContinue();
-          break;
-        }
-        const y = parseInt(await promptInput("Введите y: "));
-        if (isNaN(y)) {
-          console.log("Ошибка: y должен быть числом!");
-          await tapToContinue();
-          break;
-        }
-        const w = parseInt(await promptInput("Введите ширину: "));
-        if (isNaN(w) || w <= 0) {
+        const x = await promptIntegerInput("Введите x: ");
+        const y = await promptIntegerInput("Введите y: ");
+        let w = await promptIntegerInput("Введите ширину: ");
+        if (w <= 0) {
           console.log("Ошибка: ширина должна быть положительным числом!");
-          await tapToContinue();
+          w = await promptIntegerInput("Введите ширину: ");
           break;
         }
-        const h = parseInt(await promptInput("Введите высоту: "));
-        if (isNaN(h) || h <= 0) {
+        const h = await promptIntegerInput("Введите высоту: ");
+        if (h <= 0) {
           console.log("Ошибка: высота должна быть положительным числом!");
           await tapToContinue();
           break;
@@ -77,30 +77,10 @@ async function mainLoop(paint) {
         break;
       }
       case "2": {
-        const x1 = parseInt(await promptInput("Введите x1: "));
-        if (isNaN(x1)) {
-          console.log("Ошибка: x1 должен быть числом!");
-          await tapToContinue();
-          break;
-        }
-        const y1 = parseInt(await promptInput("Введите y1: "));
-        if (isNaN(y1)) {
-          console.log("Ошибка: y1 должен быть числом!");
-          await tapToContinue();
-          break;
-        }
-        const x2 = parseInt(await promptInput("Введите x2: "));
-        if (isNaN(x2)) {
-          console.log("Ошибка: x2 должен быть числом!");
-          await tapToContinue();
-          break;
-        }
-        const y2 = parseInt(await promptInput("Введите y2: "));
-        if (isNaN(y2)) {
-          console.log("Ошибка: y2 должен быть числом!");
-          await tapToContinue();
-          break;
-        }
+        const x1 = await promptIntegerInput("Введите x1: ");
+        const y1 = await promptIntegerInput("Введите y1: ");
+        const x2 = await promptIntegerInput("Введите x2: ");
+        const y2 = await promptIntegerInput("Введите y2: ");
         const fill =
           (await promptInput("Введите символ заливки (по умолчанию *): ")) ||
           "*";
@@ -113,20 +93,10 @@ async function mainLoop(paint) {
         break;
       }
       case "3": {
-        const x = parseInt(await promptInput("Введите x центра: "));
-        if (isNaN(x)) {
-          console.log("Ошибка: x должен быть числом!");
-          await tapToContinue();
-          break;
-        }
-        const y = parseInt(await promptInput("Введите y центра: "));
-        if (isNaN(y)) {
-          console.log("Ошибка: y должен быть числом!");
-          await tapToContinue();
-          break;
-        }
-        const r = parseInt(await promptInput("Введите радиус: "));
-        if (isNaN(r) || r <= 0) {
+        const x = await promptIntegerInput("Введите x центра: ");
+        const y = await promptIntegerInput("Введите y центра: ");
+        const r = await promptIntegerInput("Введите радиус: ");
+        if (r <= 0) {
           console.log("Ошибка: радиус должен быть положительным числом!");
           await tapToContinue();
           break;
@@ -144,28 +114,16 @@ async function mainLoop(paint) {
       }
       case "4": {
         paint.displayShapes();
-        const index = parseInt(
-          await promptInput("Введите индекс фигуры для перемещения: ")
+        const index = await promptIntegerInput(
+          "Введите индекс фигуры для перемещения: "
         );
-        if (isNaN(index) || index < 0 || index >= paint.shapes.length) {
-          console.log(
-            "Ошибка: индекс должен быть числом в пределах списка фигур!"
-          );
+        if (index < 0 || index >= paint.shapes.length) {
+          console.log("Ошибка: индекс должен быть в пределах списка фигур!");
           await tapToContinue();
           break;
         }
-        const dx = parseInt(await promptInput("Сдвиг по горизонтали (dx): "));
-        if (isNaN(dx)) {
-          console.log("Ошибка: сдвиг по горизонтали должен быть числом!");
-          await tapToContinue();
-          break;
-        }
-        const dy = parseInt(await promptInput("Сдвиг по вертикали (dy): "));
-        if (isNaN(dy)) {
-          console.log("Ошибка: сдвиг по вертикали должен быть числом!");
-          await tapToContinue();
-          break;
-        }
+        const dx = await promptIntegerInput("Сдвиг по горизонтали (dx): ");
+        const dy = await promptIntegerInput("Сдвиг по вертикали (dy): ");
         paint.moveShape(index, dx, dy);
         break;
       }
@@ -200,25 +158,26 @@ async function mainLoop(paint) {
         let filename =
           (await promptInput("Введите имя файла (по умолчанию canvas): ")) ||
           "canvas";
-
         if (!filename) {
           console.log("Ошибка: имя файла не может быть пустым!");
-          await tapToContinue();
-          break;
+        } else {
+          const saveMessage = paint.save(filename);
+          console.log(saveMessage);
         }
-
-        paint.save(filename);
+        await tapToContinue();
         break;
       }
       case "10": {
         let filename = await promptInput("Введите имя файла: ");
         if (!filename) {
           console.log("Ошибка: имя файла не может быть пустым!");
-          await tapToContinue();
-          break;
+        } else {
+          const loadMessage = paint.load(filename);
+          if (loadMessage) {
+            console.log(loadMessage);
+            await tapToContinue();
+          }
         }
-
-        paint.load(filename);
         break;
       }
       case "11": {

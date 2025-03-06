@@ -81,7 +81,7 @@ class ConsolePaint {
     const fs = require("fs");
     const shapesData = this.shapes.map((shape) => shape.toJSON());
     fs.writeFileSync(`./saves/${filename}`, JSON.stringify(shapesData));
-    console.log(`Сохранено в ${filename}`);
+    return `Сохранено в ${filename}`;
   }
 
   load(filename) {
@@ -116,7 +116,7 @@ class ConsolePaint {
       });
       this.drawAll();
     } catch (e) {
-      console.log("Ошибка при загрузке файла: " + e.message);
+      return "Ошибка при загрузке файла: " + e.message;
     }
   }
 
