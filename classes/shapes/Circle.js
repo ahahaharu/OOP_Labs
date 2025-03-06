@@ -3,6 +3,9 @@ const Shape = require("../Shape");
 class Circle extends Shape {
   constructor(x, y, radius, fill) {
     super(x, y, fill);
+    if (radius < 0) {
+      throw new Error("Radius cannot be negative");
+    }
     this.radius = radius;
   }
 
@@ -10,6 +13,10 @@ class Circle extends Shape {
     const xc = this.x;
     const yc = this.y;
     const r = this.radius;
+
+    if (r === 0) {
+      return;
+    }
 
     for (let i = yc - r; i <= yc + r && i < canvasHeight; i++) {
       for (let j = xc - r; j <= xc + r && j < canvasWidth; j++) {
