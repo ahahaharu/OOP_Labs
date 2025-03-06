@@ -159,8 +159,7 @@ describe("ConsolePaint", () => {
     fs.readFileSync.mockImplementation(() => {
       throw new Error("Файл не найден");
     });
-    paint.load("nonexistent");
-    expect(console.log).toHaveBeenCalledWith(
+    expect(paint.load("nonexistent")).toBe(
       "Ошибка при загрузке файла: Файл не найден"
     );
   });
