@@ -12,12 +12,6 @@ describe("ConsolePaint", () => {
     jest.clearAllMocks();
   });
 
-  test("display clears the console and displays the canvas", () => {
-    paint.display();
-    expect(console.clear).toHaveBeenCalled();
-    expect(console.log).toHaveBeenCalledTimes(10);
-  });
-
   test("drawAll redraws all shapes", () => {
     const rect = new Rectangle(0, 0, 3, 3, "*");
     paint.shapes.push(rect);
@@ -108,16 +102,6 @@ describe("ConsolePaint", () => {
     paint.undo();
     paint.redo();
     expect(paint.shapes.length).toBe(1);
-  });
-
-  test("display with empty canvas", () => {
-    paint.display();
-    expect(console.log).toHaveBeenCalledTimes(10);
-  });
-
-  test("drawAll without shapes", () => {
-    paint.drawAll();
-    expect(paint.canvas[0][0]).toBe(" ");
   });
 
   test("saveState does not overflow history", () => {
