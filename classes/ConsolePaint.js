@@ -15,7 +15,19 @@ class ConsolePaint {
 
   display() {
     console.clear();
-    this.canvas.forEach((row) => console.log(row.join("")));
+
+    const topLeft = "┌";
+    const topRight = "┐";
+    const bottomLeft = "└";
+    const bottomRight = "┘";
+    const horizontal = "─";
+    const vertical = "│";
+
+    console.log(topLeft + horizontal.repeat(this.width) + topRight);
+    this.canvas.forEach((row) => {
+      console.log(vertical + row.join("") + vertical);
+    });
+    console.log(bottomLeft + horizontal.repeat(this.width) + bottomRight);
   }
 
   drawAll() {
