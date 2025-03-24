@@ -12,3 +12,5 @@ class DocumentFactory {
     }
   }
 }
+
+module.exports = { DocumentFactory };

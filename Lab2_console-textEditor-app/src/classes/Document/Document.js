@@ -27,3 +27,5 @@ class Document {
     return this.history;
   }
 }
+
+module.exports = { Document };
