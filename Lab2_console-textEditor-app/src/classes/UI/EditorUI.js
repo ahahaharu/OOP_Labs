@@ -254,7 +254,6 @@ class EditorUI {
     this.loginOrCreate();
   }
 
-  // Остальные методы остаются без изменений (пример для createDocument)
   createDocument() {
     console.log("Введите тип документа");
     console.log("1. PlainText");
@@ -354,21 +353,18 @@ class EditorUI {
 
     console.log("\nРедактируйте текст (Ctrl+X для завершения):");
 
-    let text = this.documentManager.document.getContent(); // Начальный текст
-    let cursorPos = text.length; // Позиция курсора в конце текста
+    let text = this.documentManager.document.getContent();
+    let cursorPos = text.length;
     const readline = require("readline");
 
-    // Включаем raw mode для обработки клавиш
     process.stdin.setRawMode(true);
     readline.emitKeypressEvents(process.stdin);
 
-    // Функция отрисовки текста с курсором
     const renderText = () => {
-      process.stdout.write("\x1b[2J\x1b[0;0H"); // Очищаем весь экран и перемещаем курсор в начало
-      const lines = text.split("\n"); // Разбиваем текст на строки
+      process.stdout.write("\x1b[2J\x1b[0;0H");
+      const lines = text.split("\n");
       let charCount = 0;
 
-      // Вычисляем позицию курсора в терминах строк и столбцов
       let cursorLine = 0;
       let cursorCol = cursorPos;
       for (let i = 0; i < lines.length; i++) {
@@ -377,10 +373,9 @@ class EditorUI {
           cursorCol = cursorPos - charCount;
           break;
         }
-        charCount += lines[i].length + 1; // +1 для \n
+        charCount += lines[i].length + 1;
       }
 
-      // Выводим текст с курсором
       for (let i = 0; i < lines.length; i++) {
         if (i === cursorLine) {
           process.stdout.write(
@@ -399,7 +394,7 @@ class EditorUI {
       if (key.ctrl && key.name === "x") {
         process.stdin.setRawMode(false);
         process.stdin.removeListener("keypress", keyHandler);
-        this.documentManager.document.setContent(text); // Сохраняем изменения
+        this.documentManager.document.setContent(text);
         console.log("\nРедактирование завершено");
         this.pauseAndShowMenu();
       } else if (key.name === "backspace" && cursorPos > 0) {
@@ -427,7 +422,25 @@ class EditorUI {
   }
 
   formatDocument() {
-    this.rl.question("Введите стиль (bold, italic, underline): ", (style) => {
+    console.log("Выберите стиль:");
+    console.log("1. bold");
+    console.log("2. italic");
+    console.log("3. underline");
+    this.rl.question("Введите номер: ", (answer) => {
+      let style;
+      switch (answer) {
+        case "1":
+          style = "bold";
+          break;
+        case "2":
+          style = "italic";
+          break;
+        case "3":
+          style = "underline";
+          break;
+        default:
+          console.log("Неверный выбор");
+      }
       this.documentManager.formatDocument(style);
       this.pauseAndShowMenu();
     });
