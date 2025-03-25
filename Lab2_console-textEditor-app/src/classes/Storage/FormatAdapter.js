@@ -13,3 +13,5 @@ class FormatAdapter {
     console.log(`Документ сохранён как ${format}: ${path}`);
   }
 }
+
+module.exports = { FormatAdapter };

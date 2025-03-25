@@ -9,6 +9,8 @@ class Settings {
   }
 
   setTheme(theme) {
+    this.theme = theme;
+
     fs.readFile(this.configPath, "utf8", (err, data) => {
       if (err) {
         console.error("Ошибка при чтении конфигурационного файла:", err);
@@ -41,6 +43,8 @@ class Settings {
   }
 
   setFontSize(size) {
+    this.fontSize = size;
+
     fs.readFile(this.configPath, "utf8", (err, data) => {
       if (err) {
         console.error("Ошибка при чтении конфигурационного файла:", err);
@@ -65,4 +69,14 @@ class Settings {
       );
     });
   }
+
+  getTheme() {
+    return this.theme;
+  }
+
+  getFontSize() {
+    return this.fontSize;
+  }
 }
+
+module.exports = { Settings };
