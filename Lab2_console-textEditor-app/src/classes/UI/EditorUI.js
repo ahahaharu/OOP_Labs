@@ -7,17 +7,23 @@ const ViewerRole = require("../User/Roles/ViewerRole");
 const EditorRole = require("../User/Roles/EditorRole");
 const AdminRole = require("../User/Roles/AdminRole");
 const User = require("../User/User");
+const TextEditorUI = require("./TextEditorUI");
 
 class EditorUI {
-  constructor() {
-    this.documentManager = new DocumentManager(new FileStorage());
-    this.settingsManager = new SettingsManager();
-    this.userManager = new UserManager();
+  constructor(
+    documentManager = new DocumentManager(new FileStorage()),
+    settingsManager = new SettingsManager(),
+    userManager = new UserManager()
+  ) {
+    this.documentManager = documentManager;
+    this.settingsManager = settingsManager;
+    this.userManager = userManager;
     this.user = null;
     this.rl = readline.createInterface({
       input: process.stdin,
       output: process.stdout,
     });
+    this.textEditor = new TextEditorUI(this.documentManager, this.rl);
   }
 
   start() {
@@ -115,13 +121,11 @@ class EditorUI {
     this.clearConsole();
     console.log(`\n--- Меню (Пользователь: ${this.user.name}) ---`);
 
-    // Опции для всех пользователей
     console.log("\n------- Документ -------");
     console.log("1. Открыть документ");
     console.log("2. Просмотреть документ");
     console.log("3. Поиск текста");
 
-    // Опции для Editor и Admin
     if (this.user.getRole().canEdit()) {
       console.log("\n------- Редактирование -------");
       console.log("4. Создать новый документ");
@@ -132,19 +136,18 @@ class EditorUI {
       console.log("9. Undo");
       console.log("10. Redo");
       console.log("11. Вырезать/Копировать/Вставить");
+      console.log("12. Изменить тип документа");
     }
 
-    // Опции для Admin
     if (this.user.getRole().canManageUsers()) {
       console.log("\n------- Администрирование -------");
-      console.log("12. Управление пользователями");
+      console.log("13. Управление пользователями");
     }
 
-    // Общие опции
     console.log("\n------- Настройки -------");
-    console.log("13. Настройки");
-    console.log("14. Выйти из профиля");
-    console.log("15. Выйти из приложения");
+    console.log("14. Настройки");
+    console.log("15. Выйти из профиля");
+    console.log("16. Выйти из приложения");
 
     this.rl.question("Выберите действие: ", (answer) => {
       switch (answer) {
@@ -222,6 +225,14 @@ class EditorUI {
           }
           break;
         case "12":
+          if (this.user.getRole().canEdit()) {
+            this.changeDocumentType();
+          } else {
+            console.log("Нет прав на изменение типа документа");
+            this.pauseAndShowMenu();
+          }
+          break;
+        case "13":
           if (this.user.getRole().canManageUsers()) {
             this.manageUsers();
           } else {
@@ -229,13 +240,13 @@ class EditorUI {
             this.pauseAndShowMenu();
           }
           break;
-        case "13":
+        case "14":
           this.settingsMenu();
           break;
-        case "14":
+        case "15":
           this.logout();
           break;
-        case "15":
+        case "16":
           this.clearConsole();
           console.log("До свидания!");
           this.rl.close();
@@ -247,7 +258,24 @@ class EditorUI {
     });
   }
 
-  // Выход из профиля
+  changeDocumentType() {
+    console.log("\nВыберите новый тип документа:");
+    console.log("1. PlainText");
+    console.log("2. Markdown");
+    console.log("3. RichText");
+    this.rl.question("Введите номер типа: ", (typeChoice) => {
+      const types = { 1: "PlainText", 2: "Markdown", 3: "RichText" };
+      const newType = types[typeChoice];
+      if (!newType) {
+        console.log("Неверный выбор типа");
+        this.pauseAndShowMenu();
+        return;
+      }
+      this.documentManager.changeDocumentType(newType);
+      this.pauseAndShowMenu();
+    });
+  }
+
   logout() {
     this.user = null;
     console.log("Вы вышли из профиля");
@@ -303,38 +331,23 @@ class EditorUI {
   }
 
   saveDocument() {
-    this.rl.question(
-      "Введите путь для сохранения (по умолчанию docs/file):  ",
-      (path) => {
-        console.log("\nВыберите формат сохранения:");
-        console.log("1. TXT");
-        console.log("2. JSON");
-        console.log("3. XML");
-        this.rl.question("Введите номер формата: ", (formatChoice) => {
-          let format;
-          switch (formatChoice) {
-            case "1":
-              format = "TXT";
-              break;
-            case "2":
-              format = "JSON";
-              break;
-            case "3":
-              format = "XML";
-              break;
-            default:
-              console.log("Неверный выбор формата. Попробуйте снова.");
-              this.saveDocument();
-              return;
-          }
-          if (!path) {
-            path = "file";
-          }
-          this.documentManager.saveDocument(path, format);
-          this.pauseAndShowMenu();
-        });
-      }
-    );
+    this.rl.question("Введите путь для сохранения: ", (path) => {
+      console.log("\nВыберите формат сохранения:");
+      console.log("1. TXT");
+      console.log("2. JSON");
+      console.log("3. XML");
+      this.rl.question("Введите номер формата: ", (formatChoice) => {
+        const formats = { 1: "TXT", 2: "JSON", 3: "XML" };
+        const format = formats[formatChoice];
+        if (!format) {
+          console.log("Неверный выбор формата");
+          this.saveDocument();
+          return;
+        }
+        this.documentManager.saveDocument(path, format);
+        this.pauseAndShowMenu();
+      });
+    });
   }
 
   deleteDocument() {
@@ -344,91 +357,25 @@ class EditorUI {
     });
   }
 
-  editDocument() {
-    if (!this.documentManager.document) {
-      console.log("Нет открытого документа");
-      this.pauseAndShowMenu();
-      return;
-    }
-
-    console.log("\nРедактируйте текст (Ctrl+X для завершения):");
-
-    let text = this.documentManager.document.getContent();
-    let cursorPos = text.length;
-    const readline = require("readline");
-
-    process.stdin.setRawMode(true);
-    readline.emitKeypressEvents(process.stdin);
-
-    const renderText = () => {
-      process.stdout.write("\x1b[2J\x1b[0;0H");
-      const lines = text.split("\n");
-      let charCount = 0;
-
-      let cursorLine = 0;
-      let cursorCol = cursorPos;
-      for (let i = 0; i < lines.length; i++) {
-        if (charCount + lines[i].length >= cursorPos) {
-          cursorLine = i;
-          cursorCol = cursorPos - charCount;
-          break;
-        }
-        charCount += lines[i].length + 1;
-      }
-
-      for (let i = 0; i < lines.length; i++) {
-        if (i === cursorLine) {
-          process.stdout.write(
-            lines[i].slice(0, cursorCol) + "|" + lines[i].slice(cursorCol)
-          );
-        } else {
-          process.stdout.write(lines[i]);
-        }
-        if (i < lines.length - 1) process.stdout.write("\n");
-      }
-    };
-
-    renderText();
-
-    const keyHandler = (str, key) => {
-      if (key.ctrl && key.name === "x") {
-        process.stdin.setRawMode(false);
-        process.stdin.removeListener("keypress", keyHandler);
-        this.documentManager.document.setContent(text);
-        console.log("\nРедактирование завершено");
-        this.pauseAndShowMenu();
-      } else if (key.name === "backspace" && cursorPos > 0) {
-        text = text.slice(0, cursorPos - 1) + text.slice(cursorPos);
-        cursorPos--;
-        renderText();
-      } else if (key.name === "return") {
-        text = text.slice(0, cursorPos) + "\n" + text.slice(cursorPos);
-        cursorPos++;
-        renderText();
-      } else if (key.name === "left" && cursorPos > 0) {
-        cursorPos--;
-        renderText();
-      } else if (key.name === "right" && cursorPos < text.length) {
-        cursorPos++;
-        renderText();
-      } else if (!key.ctrl && !key.meta && str) {
-        text = text.slice(0, cursorPos) + str + text.slice(cursorPos);
-        cursorPos++;
-        renderText();
-      }
-    };
-
-    process.stdin.on("keypress", keyHandler);
+  async editDocument() {
+    await this.textEditor.edit();
+    this.pauseAndShowMenu();
   }
 
   formatDocument() {
-    console.log("Выберите стиль:");
-    console.log("1. bold");
-    console.log("2. italic");
-    console.log("3. underline");
-    this.rl.question("Введите номер: ", (answer) => {
-      let style;
-      switch (answer) {
+    console.log("\nВыберите стиль форматирования:");
+    console.log("1. Bold");
+    console.log("2. Italic");
+    console.log("3. Underline");
+    if (
+      this.documentManager.document &&
+      this.documentManager.document.type === "Markdown"
+    ) {
+      console.log("4. Color");
+    }
+    this.rl.question("Введите номер стиля: ", (styleChoice) => {
+      let style, value;
+      switch (styleChoice) {
         case "1":
           style = "bold";
           break;
@@ -438,11 +385,42 @@ class EditorUI {
         case "3":
           style = "underline";
           break;
+        case "4":
+          if (this.documentManager.document.type === "Markdown") {
+            style = "color";
+          } else {
+            console.log("Неверный выбор стиля");
+            this.pauseAndShowMenu();
+            return;
+          }
+          break;
         default:
-          console.log("Неверный выбор");
+          console.log("Неверный выбор стиля");
+          this.pauseAndShowMenu();
+          return;
       }
-      this.documentManager.formatDocument(style);
-      this.pauseAndShowMenu();
+      this.rl.question("Введите начальную позицию: ", (start) => {
+        this.rl.question("Введите длину текста: ", (length) => {
+          if (style === "color") {
+            this.rl.question("Введите цвет (red, green, blue): ", (color) => {
+              this.documentManager.formatDocument(
+                style,
+                parseInt(start),
+                parseInt(length),
+                color
+              );
+              this.pauseAndShowMenu();
+            });
+          } else {
+            this.documentManager.formatDocument(
+              style,
+              parseInt(start),
+              parseInt(length)
+            );
+            this.pauseAndShowMenu();
+          }
+        });
+      });
     });
   }
 
@@ -537,11 +515,6 @@ class EditorUI {
   }
 
   viewDocument() {
-    if (!this.user.getRole().canView()) {
-      console.log("Нет прав на просмотр");
-      this.pauseAndShowMenu();
-      return;
-    }
     this.documentManager.viewDocument();
     this.pauseAndShowMenu();
   }

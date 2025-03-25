@@ -3,11 +3,12 @@ const UndoRedoManager = require("../Utils/UndoRedoManager");
 const Document = require("./Document");
 const DocumentFactory = require("./DocumentFactory");
 const InsertTextCommand = require("../Commands/InsertTextCommand");
-const BoldFormatter = require("../Formatter/BoldFormatter");
-const ItalicFormatter = require("../Formatter/ItalicFormatter");
-const UnderlineFormatter = require("../Formatter/UnderlineFormatter");
-const FormatAdapter = require("../Storage/FormatAdapter");
+
 const fs = require("fs");
+const TxtFormat = require("../Storage/TxtFormat");
+const JsonFormat = require("../Storage/JsonFormat");
+const XmlFormat = require("../Storage/XmlFormat");
+const xml2js = require("xml2js");
 
 class DocumentManager {
   constructor(storage) {
@@ -15,11 +16,15 @@ class DocumentManager {
     this.storage = storage;
     this.editor = null;
     this.undoRedo = new UndoRedoManager();
+    this.formatStrategies = {
+      TXT: new TxtFormat(),
+      JSON: new JsonFormat(),
+      XML: new XmlFormat(),
+    };
   }
 
   createDocument(type) {
     this.document = DocumentFactory.createDocument(type);
-
     this.editor = new TextEditor(this.document);
     // this.document.addObserver(new DocumentObserver());
     console.log(`Создан документ типа ${type}`);
@@ -27,12 +32,34 @@ class DocumentManager {
 
   openDocument(path) {
     try {
-      path = "docs/" + path;
-      const content = this.storage.load(path);
-      this.document = new Document("PlainText", content);
+      const ext = path.split(".").pop().toLowerCase();
+      let content, type;
+
+      if (ext === "txt") {
+        content = this.storage.load(path);
+        type = "PlainText";
+      } else if (ext === "json") {
+        const rawData = fs.readFileSync(path, "utf8");
+        const data = JSON.parse(rawData);
+        type = data.type;
+        content = data.content;
+      } else if (ext === "xml") {
+        const rawData = fs.readFileSync(path, "utf8");
+        xml2js.parseString(rawData, (err, result) => {
+          if (err) throw err;
+          type = result.document.$.type;
+          content = result.document.content[0];
+        });
+      } else {
+        throw new Error("Неподдерживаемый формат файла");
+      }
+
+      this.document = new Document(type, content);
       this.editor = new TextEditor(this.document);
-      // this.document.addObserver(new DocumentObserver());
-      console.log(`Открыт документ: ${content}`);
+      // this.document.addObserver({ update: () => console.log(`Документ обновлён: ${this.document.getFormattedContent()}`) });
+      console.log(
+        `Открыт документ типа ${type}: ${this.document.getContent()}`
+      );
     } catch (error) {
       console.log(error.message);
     }
@@ -43,7 +70,21 @@ class DocumentManager {
       console.log("Нет открытого документа");
       return;
     }
-    FormatAdapter.saveAsFormat(this.document, path, format.toUpperCase());
+    const strategy = this.formatStrategies[format];
+    if (!strategy) {
+      console.log("Неподдерживаемый формат");
+      return;
+    }
+    strategy.save(this.document, path);
+  }
+
+  changeDocumentType(newType) {
+    if (!this.document) {
+      console.log("Нет открытого документа");
+      return;
+    }
+    this.document.setType(newType);
+    console.log(`Тип документа изменён на ${newType}`);
   }
 
   deleteDocument(path) {
@@ -65,31 +106,41 @@ class DocumentManager {
     this.undoRedo.executeCommand(command);
   }
 
-  formatDocument(style) {
+  formatDocument(style, start, length, value) {
     if (!this.document) {
       console.log("Нет открытого документа");
       return;
     }
-    try {
-      let formatter;
-      switch (style) {
-        case "bold":
-          formatter = new BoldFormatter(this.document);
-          break;
-        case "italic":
-          formatter = new ItalicFormatter(this.document);
-          break;
-        case "underline":
-          formatter = new UnderlineFormatter(this.document);
-          break;
-        default:
-          throw new Error("Неподдерживаемый стиль");
-      }
-      const formatted = formatter.format();
-      console.log(`Отформатированный текст: ${formatted}`);
-      this.document.setContent(formatted);
-    } catch (error) {
-      console.log(error.message);
+    if (this.document.type === "PlainText") {
+      console.log("PlainText не поддерживает форматирование");
+      return;
+    }
+    if (this.document.type === "RichText") {
+      this.document.applyFormatting(start, length, style, value);
+      console.log(
+        `Отформатированный текст: ${this.document.getFormattedContent()}`
+      );
+    } else if (
+      this.document.type === "Markdown" &&
+      ["bold", "italic", "underline"].includes(style)
+    ) {
+      const current = this.document.getContent();
+      const formatters = { bold: "**", italic: "*", underline: "__" };
+      const formattedText =
+        current.slice(0, start) +
+        formatters[style] +
+        current.slice(start, start + length) +
+        formatters[style] +
+        current.slice(start + length);
+      this.document.setContent(formattedText);
+      console.log(
+        `Отформатированный текст: ${this.document.getFormattedContent()}`
+      );
+    } else if (this.document.type === "Markdown" && style === "color") {
+      this.document.applyColor(start, length, value);
+      console.log(
+        `Отформатированный текст: ${this.document.getFormattedContent()}`
+      );
     }
   }
 
@@ -106,7 +157,9 @@ class DocumentManager {
       console.log("Нет открытого документа");
       return;
     }
-    console.log(`Содержимое документа: ${this.document.getContent()}`);
+    console.log(
+      `Содержимое документа:\n${this.document.getFormattedContent()}`
+    );
   }
 
   cutCopyPaste(action, position, length, text) {
