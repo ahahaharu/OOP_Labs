@@ -47,6 +47,7 @@ class DocumentManager {
   }
 
   deleteDocument(path) {
+    path = "docs/" + path;
     if (fs.existsSync(path)) {
       fs.unlinkSync(path);
       console.log(`Документ удалён: ${path}`);
