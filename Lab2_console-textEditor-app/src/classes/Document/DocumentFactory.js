@@ -1,3 +1,5 @@
+const Document = require("./Document");
+
 class DocumentFactory {
   static createDocument(type) {
     switch (type) {

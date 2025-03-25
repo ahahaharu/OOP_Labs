@@ -6,6 +6,7 @@ const InsertTextCommand = require("../Commands/InsertTextCommand");
 const BoldFormatter = require("../Formatter/BoldFormatter");
 const ItalicFormatter = require("../Formatter/ItalicFormatter");
 const UnderlineFormatter = require("../Formatter/UnderlineFormatter");
+const FormatAdapter = require("../Storage/FormatAdapter");
 const fs = require("fs");
 
 class DocumentManager {
@@ -18,8 +19,9 @@ class DocumentManager {
 
   createDocument(type) {
     this.document = DocumentFactory.createDocument(type);
+
     this.editor = new TextEditor(this.document);
-    this.document.addObserver(new DocumentObserver());
+    // this.document.addObserver(new DocumentObserver());
     console.log(`Создан документ типа ${type}`);
   }
 

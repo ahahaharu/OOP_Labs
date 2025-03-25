@@ -1,4 +1,4 @@
-import { Role } from "./Role";
+const Role = require("./Role");
 
 class AdminRole extends Role {
   canEdit() {
@@ -12,4 +12,4 @@ class AdminRole extends Role {
   }
 }
 
-module.exports = { AdminRole };
+module.exports = AdminRole;

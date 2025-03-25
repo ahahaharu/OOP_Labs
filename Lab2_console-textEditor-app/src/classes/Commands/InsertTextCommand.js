@@ -15,4 +15,4 @@ class InsertTextCommand extends Command {
   }
 }
 
-module.exports = { InsertTextCommand };
+module.exports = InsertTextCommand;

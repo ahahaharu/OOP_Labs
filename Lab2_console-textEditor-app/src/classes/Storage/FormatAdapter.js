@@ -1,5 +1,7 @@
+const fs = require("fs");
 class FormatAdapter {
   static saveAsFormat(document, path, format) {
+    path = "docs/" + path;
     let content = document.getContent();
     if (format === "JSON") {
       content = JSON.stringify({ content });
