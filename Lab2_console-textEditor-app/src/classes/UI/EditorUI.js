@@ -294,10 +294,13 @@ class EditorUI {
   }
 
   openDocument() {
-    this.rl.question("Введите путь к документу: ", (path) => {
-      this.documentManager.openDocument(path);
-      this.pauseAndShowMenu();
-    });
+    this.rl.question(
+      "Введите название документа (например file.txt): ",
+      (path) => {
+        this.documentManager.openDocument(path);
+        this.pauseAndShowMenu();
+      }
+    );
   }
 
   saveDocument() {

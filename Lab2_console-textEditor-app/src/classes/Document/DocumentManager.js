@@ -27,6 +27,7 @@ class DocumentManager {
 
   openDocument(path) {
     try {
+      path = "docs/" + path;
       const content = this.storage.load(path);
       this.document = new Document("PlainText", content);
       this.editor = new TextEditor(this.document);
