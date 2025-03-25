@@ -1,3 +1,5 @@
+const fs = require("fs");
+
 class Settings {
   constructor() {
     if (Settings.instance) return Settings.instance;

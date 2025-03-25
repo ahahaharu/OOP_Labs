@@ -339,20 +339,91 @@ class EditorUI {
   }
 
   deleteDocument() {
-    this.rl.question("Введите путь к документу для удаления: ", (path) => {
+    this.rl.question("Введите название документа для удаления: ", (path) => {
       this.documentManager.deleteDocument(path);
       this.pauseAndShowMenu();
     });
   }
 
   editDocument() {
-    this.rl.question("Введите позицию для вставки: ", (pos) => {
-      const position = parseInt(pos);
-      this.rl.question("Введите текст для вставки: ", (text) => {
-        this.documentManager.editDocument(position, text);
+    if (!this.documentManager.document) {
+      console.log("Нет открытого документа");
+      this.pauseAndShowMenu();
+      return;
+    }
+
+    console.log("\nРедактируйте текст (Ctrl+X для завершения):");
+
+    let text = this.documentManager.document.getContent(); // Начальный текст
+    let cursorPos = text.length; // Позиция курсора в конце текста
+    const readline = require("readline");
+
+    // Включаем raw mode для обработки клавиш
+    process.stdin.setRawMode(true);
+    readline.emitKeypressEvents(process.stdin);
+
+    // Функция отрисовки текста с курсором
+    const renderText = () => {
+      process.stdout.write("\x1b[2J\x1b[0;0H"); // Очищаем весь экран и перемещаем курсор в начало
+      const lines = text.split("\n"); // Разбиваем текст на строки
+      let charCount = 0;
+
+      // Вычисляем позицию курсора в терминах строк и столбцов
+      let cursorLine = 0;
+      let cursorCol = cursorPos;
+      for (let i = 0; i < lines.length; i++) {
+        if (charCount + lines[i].length >= cursorPos) {
+          cursorLine = i;
+          cursorCol = cursorPos - charCount;
+          break;
+        }
+        charCount += lines[i].length + 1; // +1 для \n
+      }
+
+      // Выводим текст с курсором
+      for (let i = 0; i < lines.length; i++) {
+        if (i === cursorLine) {
+          process.stdout.write(
+            lines[i].slice(0, cursorCol) + "|" + lines[i].slice(cursorCol)
+          );
+        } else {
+          process.stdout.write(lines[i]);
+        }
+        if (i < lines.length - 1) process.stdout.write("\n");
+      }
+    };
+
+    renderText();
+
+    const keyHandler = (str, key) => {
+      if (key.ctrl && key.name === "x") {
+        process.stdin.setRawMode(false);
+        process.stdin.removeListener("keypress", keyHandler);
+        this.documentManager.document.setContent(text); // Сохраняем изменения
+        console.log("\nРедактирование завершено");
         this.pauseAndShowMenu();
-      });
-    });
+      } else if (key.name === "backspace" && cursorPos > 0) {
+        text = text.slice(0, cursorPos - 1) + text.slice(cursorPos);
+        cursorPos--;
+        renderText();
+      } else if (key.name === "return") {
+        text = text.slice(0, cursorPos) + "\n" + text.slice(cursorPos);
+        cursorPos++;
+        renderText();
+      } else if (key.name === "left" && cursorPos > 0) {
+        cursorPos--;
+        renderText();
+      } else if (key.name === "right" && cursorPos < text.length) {
+        cursorPos++;
+        renderText();
+      } else if (!key.ctrl && !key.meta && str) {
+        text = text.slice(0, cursorPos) + str + text.slice(cursorPos);
+        cursorPos++;
+        renderText();
+      }
+    };
+
+    process.stdin.on("keypress", keyHandler);
   }
 
   formatDocument() {
