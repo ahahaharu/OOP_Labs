@@ -1,4 +1,4 @@
-import { Formatter } from "./Formatter";
+const Formatter = require("./Formatter");
 
 class UnderlineFormatter extends Formatter {
   format() {
@@ -6,4 +6,4 @@ class UnderlineFormatter extends Formatter {
   }
 }
 
-module.exports = { UnderlineFormatter };
+module.exports = UnderlineFormatter;

@@ -41,4 +41,4 @@ class TextEditor {
   }
 }
 
-module.exports = { TextEditor };
+module.exports = TextEditor;

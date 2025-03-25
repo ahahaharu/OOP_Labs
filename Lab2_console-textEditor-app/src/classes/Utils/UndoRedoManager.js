@@ -28,4 +28,4 @@ class UndoRedoManager {
   }
 }
 
-module.exports = { UndoRedoManager };
+module.exports = UndoRedoManager;

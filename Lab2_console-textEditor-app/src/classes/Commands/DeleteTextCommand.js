@@ -1,4 +1,4 @@
-import { Command } from "./Command";
+const Command = require("./Command");
 
 class DeleteTextCommand extends Command {
   constructor(editor, position, length) {
@@ -18,4 +18,4 @@ class DeleteTextCommand extends Command {
   }
 }
 
-module.exports = { DeleteTextCommand };
+module.exports = DeleteTextCommand;

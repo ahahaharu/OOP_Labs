@@ -6,3 +6,5 @@ class Storage {
     throw new Error("Метод load не реализован");
   }
 }
+
+module.exports = Storage;

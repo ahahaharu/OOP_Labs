@@ -13,4 +13,4 @@ class DocumentFactory {
   }
 }
 
-module.exports = { DocumentFactory };
+module.exports = DocumentFactory;

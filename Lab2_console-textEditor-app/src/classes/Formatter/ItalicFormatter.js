@@ -1,4 +1,4 @@
-import { Formatter } from "./Formatter";
+const Formatter = require("./Formatter");
 
 class ItalicFormatter extends Formatter {
   format() {
@@ -6,4 +6,4 @@ class ItalicFormatter extends Formatter {
   }
 }
 
-module.exports = { ItalicFormatter };
+module.exports = ItalicFormatter;

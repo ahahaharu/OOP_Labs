@@ -7,4 +7,4 @@ class Formatter {
   }
 }
 
-module.exports = { Formatter };
+module.exports = Formatter;

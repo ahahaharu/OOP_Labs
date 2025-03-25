@@ -1,4 +1,5 @@
-import fs from "fs";
+const fs = require("fs");
+const Storage = require("./Storage");
 
 class FileStorage extends Storage {
   save(document, path) {
@@ -12,3 +13,5 @@ class FileStorage extends Storage {
     throw new Error(`Файл ${path} не найден`);
   }
 }
+
+module.exports = FileStorage;

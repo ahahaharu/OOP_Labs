@@ -1,4 +1,4 @@
-import { Formatter } from "./Formatter";
+const Formatter = require("./Formatter");
 
 class BoldFormatter extends Formatter {
   format() {
@@ -6,4 +6,4 @@ class BoldFormatter extends Formatter {
   }
 }
 
-module.exports = { BoldFormatter };
+module.exports = BoldFormatter;

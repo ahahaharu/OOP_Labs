@@ -14,4 +14,4 @@ class FormatAdapter {
   }
 }
 
-module.exports = { FormatAdapter };
+module.exports = FormatAdapter;

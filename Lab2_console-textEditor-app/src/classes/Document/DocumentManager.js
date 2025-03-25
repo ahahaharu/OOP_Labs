@@ -1,12 +1,12 @@
-import { TextEditor } from "../Commands/TextEditor";
-import { UndoRedoManager } from "../Utils/UndoRedoManager";
-import { Document } from "./Document";
-import { DocumentFactory } from "./DocumentFactory";
-import { InsertTextCommand } from "../Commands/InsertTextCommand";
-import { BoldFormatter } from "../Formatter/BoldFormatter";
-import { BoldFormatter } from "../Formatter/ItalicFormatter";
-import { BoldFormatter } from "../Formatter/UnderlineFormatter";
-import fs from "fs";
+const TextEditor = require("../Commands/TextEditor");
+const UndoRedoManager = require("../Utils/UndoRedoManager");
+const Document = require("./Document");
+const DocumentFactory = require("./DocumentFactory");
+const InsertTextCommand = require("../Commands/InsertTextCommand");
+const BoldFormatter = require("../Formatter/BoldFormatter");
+const ItalicFormatter = require("../Formatter/ItalicFormatter");
+const UnderlineFormatter = require("../Formatter/UnderlineFormatter");
+const fs = require("fs");
 
 class DocumentManager {
   constructor(storage) {
@@ -28,7 +28,7 @@ class DocumentManager {
       const content = this.storage.load(path);
       this.document = new Document("PlainText", content);
       this.editor = new TextEditor(this.document);
-      this.document.addObserver(new DocumentObserver());
+      // this.document.addObserver(new DocumentObserver());
       console.log(`Открыт документ: ${content}`);
     } catch (error) {
       console.log(error.message);
@@ -152,4 +152,4 @@ class DocumentManager {
   }
 }
 
-module.exports = { DocumentManager };
+module.exports = DocumentManager;

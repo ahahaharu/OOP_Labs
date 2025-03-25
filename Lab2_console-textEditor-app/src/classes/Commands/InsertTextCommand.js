@@ -1,4 +1,4 @@
-import { Command } from "./Command";
+const Command = require("./Command");
 
 class InsertTextCommand extends Command {
   constructor(editor, position, text) {
