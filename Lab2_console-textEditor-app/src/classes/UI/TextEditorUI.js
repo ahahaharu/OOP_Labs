@@ -1,4 +1,6 @@
 const readline = require("readline");
+const InsertTextCommand = require("../Commands/InsertTextCommand");
+const ReplaceTextCommand = require("../Commands/ReplaceTextCommand");
 
 class TextEditorUI {
   constructor(documentManager, rl) {
@@ -14,7 +16,7 @@ class TextEditorUI {
 
     console.log("\nРедактируйте текст (Ctrl+X для завершения):");
 
-    let text = this.documentManager.document.getContent();
+    let text = this.documentManager.document.getContent(); // Исходный текст
     let cursorPos = text.length;
 
     process.stdin.setRawMode(true);
@@ -22,30 +24,9 @@ class TextEditorUI {
 
     const renderText = () => {
       process.stdout.write("\x1b[2J\x1b[0;0H");
-      const lines = text.split("\n");
-      let charCount = 0;
-
-      let cursorLine = 0;
-      let cursorCol = cursorPos;
-      for (let i = 0; i < lines.length; i++) {
-        if (charCount + lines[i].length >= cursorPos) {
-          cursorLine = i;
-          cursorCol = cursorPos - charCount;
-          break;
-        }
-        charCount += lines[i].length + 1;
-      }
-
-      for (let i = 0; i < lines.length; i++) {
-        if (i === cursorLine) {
-          process.stdout.write(
-            lines[i].slice(0, cursorCol) + "|" + lines[i].slice(cursorCol)
-          );
-        } else {
-          process.stdout.write(lines[i]);
-        }
-        if (i < lines.length - 1) process.stdout.write("\n");
-      }
+      process.stdout.write(
+        text.slice(0, cursorPos) + "|" + text.slice(cursorPos)
+      );
     };
 
     renderText();
@@ -55,7 +36,12 @@ class TextEditorUI {
         if (key.ctrl && key.name === "x") {
           process.stdin.setRawMode(false);
           process.stdin.removeListener("keypress", keyHandler);
-          this.documentManager.document.setContent(text);
+          // Создаём команду для замены текста только при завершении
+          const command = new ReplaceTextCommand(
+            this.documentManager.document,
+            text
+          );
+          this.documentManager.undoRedo.executeCommand(command);
           console.log("\nРедактирование завершено");
           resolve();
         } else if (key.name === "backspace" && cursorPos > 0) {

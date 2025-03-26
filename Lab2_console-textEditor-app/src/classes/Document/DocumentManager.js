@@ -9,6 +9,10 @@ const TxtFormat = require("../Storage/TxtFormat");
 const JsonFormat = require("../Storage/JsonFormat");
 const XmlFormat = require("../Storage/XmlFormat");
 const xml2js = require("xml2js");
+const CutCommand = require("../Commands/CutCommand");
+const PasteCommand = require("../Commands/PasteCommand");
+const FormatCommand = require("../Commands/FormatCommand");
+const MarkdownFormatCommand = require("../Commands/MarkdownFormatCommand");
 
 class DocumentManager {
   constructor(storage) {
@@ -118,33 +122,19 @@ class DocumentManager {
       console.log("PlainText не поддерживает форматирование");
       return;
     }
+    let command;
     if (this.document.type === "RichText") {
-      this.document.applyFormatting(start, length, style, value);
-      console.log(
-        `Отформатированный текст: ${this.document.getFormattedContent()}`
-      );
-    } else if (
-      this.document.type === "Markdown" &&
-      ["bold", "italic", "underline"].includes(style)
-    ) {
-      const current = this.document.getContent();
-      const formatters = { bold: "**", italic: "*", underline: "__" };
-      const formattedText =
-        current.slice(0, start) +
-        formatters[style] +
-        current.slice(start, start + length) +
-        formatters[style] +
-        current.slice(start + length);
-      this.document.setContent(formattedText);
-      console.log(
-        `Отформатированный текст: ${this.document.getFormattedContent()}`
-      );
-    } else if (this.document.type === "Markdown" && style === "color") {
-      this.document.applyColor(start, length, value);
-      console.log(
-        `Отформатированный текст: ${this.document.getFormattedContent()}`
+      command = new FormatCommand(this.document, start, length, style, value);
+    } else if (this.document.type === "Markdown") {
+      command = new MarkdownFormatCommand(
+        this.document,
+        start,
+        length,
+        style,
+        value
       );
     }
+    this.undoRedo.executeCommand(command);
   }
 
   undo() {
@@ -165,30 +155,14 @@ class DocumentManager {
     );
   }
 
-  cutCopyPaste(action, position, length, text) {
-    if (!this.document) {
-      console.log("Нет открытого документа");
-      return;
-    }
-    if (action === "cut") {
-      this.clipboard = this.editor.cutText(position, length);
-      console.log(`Вырезано: ${this.clipboard}`);
-    } else if (action === "copy") {
-      this.clipboard = this.editor.copyText(position, length);
-      console.log(`Скопировано: ${this.clipboard}`);
-    } else if (action === "paste") {
-      this.editor.pasteText(position, text);
-      console.log("Текст вставлен");
-    }
-  }
-
   cutText(start, length) {
     if (!this.document || !this.editor) {
       console.log("Нет открытого документа");
       return;
     }
-    this.clipboard = this.editor.cutText(start, length);
-    console.log(`Вырезано: "${this.clipboard}"`);
+    const command = new CutCommand(this.editor, start, length);
+    this.undoRedo.executeCommand(command);
+    this.clipboard = command.cutText;
   }
 
   copyText(start, length) {
@@ -210,8 +184,8 @@ class DocumentManager {
       console.log("Буфер обмена пуст");
       return;
     }
-    this.editor.pasteText(position, pasteContent);
-    console.log(`Вставлено: "${pasteContent}"`);
+    const command = new PasteCommand(this.editor, position, pasteContent);
+    this.undoRedo.executeCommand(command);
   }
 
   getClipboard() {
