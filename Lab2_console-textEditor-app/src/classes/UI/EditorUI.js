@@ -520,28 +520,43 @@ class EditorUI {
   }
 
   cutCopyPaste() {
+    console.log("\nВыберите действие:");
     console.log("1. Вырезать");
     console.log("2. Копировать");
     console.log("3. Вставить");
-    this.rl.question("Выберите действие: ", (action) => {
+    this.rl.question("Введите номер действия: ", (action) => {
       if (action === "1" || action === "2") {
-        this.rl.question("Введите позицию: ", (pos) => {
-          this.rl.question("Введите длину: ", (len) => {
-            const position = parseInt(pos);
-            const length = parseInt(len);
+        this.rl.question("Введите начальную позицию: ", (start) => {
+          this.rl.question("Введите длину текста: ", (length) => {
+            const startPos = parseInt(start);
+            const len = parseInt(length);
             if (action === "1") {
-              this.documentManager.cutCopyPaste("cut", position, length);
+              this.documentManager.cutText(startPos, len);
             } else {
-              this.documentManager.cutCopyPaste("copy", position, length);
+              this.documentManager.copyText(startPos, len);
             }
             this.pauseAndShowMenu();
           });
         });
       } else if (action === "3") {
         this.rl.question("Введите позицию для вставки: ", (pos) => {
-          this.rl.question("Введите текст для вставки: ", (text) => {
-            this.documentManager.cutCopyPaste("paste", parseInt(pos), 0, text);
-            this.pauseAndShowMenu();
+          const position = parseInt(pos);
+          console.log("\nВыберите источник текста:");
+          console.log("1. Вставить текст из буфера обмена программы");
+          console.log("2. Ввести свой текст");
+          this.rl.question("Введите номер: ", (choice) => {
+            if (choice === "1") {
+              this.documentManager.pasteText(position);
+              this.pauseAndShowMenu();
+            } else if (choice === "2") {
+              this.rl.question("Введите текст для вставки: ", (customText) => {
+                this.documentManager.pasteText(position, customText);
+                this.pauseAndShowMenu();
+              });
+            } else {
+              console.log("Неверный выбор");
+              this.pauseAndShowMenu();
+            }
           });
         });
       } else {

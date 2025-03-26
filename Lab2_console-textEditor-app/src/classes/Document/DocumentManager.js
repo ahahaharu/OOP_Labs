@@ -16,6 +16,7 @@ class DocumentManager {
     this.storage = storage;
     this.editor = null;
     this.undoRedo = new UndoRedoManager();
+    this.clipboard = "";
     this.formatStrategies = {
       TXT: new TxtFormat(),
       JSON: new JsonFormat(),
@@ -179,6 +180,42 @@ class DocumentManager {
       this.editor.pasteText(position, text);
       console.log("Текст вставлен");
     }
+  }
+
+  cutText(start, length) {
+    if (!this.document || !this.editor) {
+      console.log("Нет открытого документа");
+      return;
+    }
+    this.clipboard = this.editor.cutText(start, length);
+    console.log(`Вырезано: "${this.clipboard}"`);
+  }
+
+  copyText(start, length) {
+    if (!this.document || !this.editor) {
+      console.log("Нет открытого документа");
+      return;
+    }
+    this.clipboard = this.editor.copyText(start, length);
+    console.log(`Скопировано: "${this.clipboard}"`);
+  }
+
+  pasteText(position, text = null) {
+    if (!this.document || !this.editor) {
+      console.log("Нет открытого документа");
+      return;
+    }
+    const pasteContent = text !== null ? text : this.clipboard;
+    if (!pasteContent) {
+      console.log("Буфер обмена пуст");
+      return;
+    }
+    this.editor.pasteText(position, pasteContent);
+    console.log(`Вставлено: "${pasteContent}"`);
+  }
+
+  getClipboard() {
+    return this.clipboard;
   }
 
   searchText(query) {
