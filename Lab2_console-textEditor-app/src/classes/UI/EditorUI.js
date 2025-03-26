@@ -64,7 +64,12 @@ class EditorUI {
 
   login() {
     this.rl.question("Введите имя пользователя: ", (name) => {
-      const user = this.userManager.getUser(name);
+      if (!name || name.trim() === "") {
+        console.log("Имя пользователя не может быть пустым");
+        this.loginOrCreate();
+        return;
+      }
+      const user = this.userManager.getUser(name.trim());
       if (user) {
         this.user = user;
         console.log(`Вход выполнен: ${name}`);
@@ -78,7 +83,12 @@ class EditorUI {
 
   createProfile() {
     this.rl.question("Введите имя пользователя: ", (name) => {
-      if (this.userManager.getUser(name)) {
+      if (!name || name.trim() === "") {
+        console.log("Имя пользователя не может быть пустым");
+        this.loginOrCreate();
+        return;
+      }
+      if (this.userManager.getUser(name.trim())) {
         console.log("Пользователь с таким именем уже существует");
         this.loginOrCreate();
         return;
@@ -88,8 +98,13 @@ class EditorUI {
       console.log("2. Editor");
       console.log("3. Admin");
       this.rl.question("Введите номер: ", (role) => {
+        if (!role || role.trim() === "") {
+          console.log("Роль не может быть пустой");
+          this.loginOrCreate();
+          return;
+        }
         let userRole;
-        switch (role) {
+        switch (role.trim()) {
           case "1":
             userRole = new ViewerRole();
             break;
@@ -100,11 +115,11 @@ class EditorUI {
             userRole = new AdminRole();
             break;
           default:
-            console.log("Неверная роль");
+            console.log("Неверная роль. Доступны: 1, 2, 3");
             this.loginOrCreate();
             return;
         }
-        const user = new User(name, userRole);
+        const user = new User(name.trim(), userRole);
         this.userManager.addUser(user);
         this.user = user;
         console.log(`Профиль создан и вход выполнен: ${name} с ролью ${role}`);
@@ -328,7 +343,12 @@ class EditorUI {
     this.rl.question(
       "Введите название документа (например file.txt): ",
       (path) => {
-        this.documentManager.openDocument(path);
+        if (!path || path.trim() === "") {
+          console.log("Путь к документу не может быть пустым");
+          this.pauseAndShowMenu();
+          return;
+        }
+        this.documentManager.openDocument(path.trim());
         this.pauseAndShowMenu();
       }
     );
