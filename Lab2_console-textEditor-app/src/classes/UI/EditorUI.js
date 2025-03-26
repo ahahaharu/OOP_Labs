@@ -145,6 +145,7 @@ class EditorUI {
     console.log("15. Выйти из профиля");
     console.log("16. Выйти из приложения");
     console.log("17. Посмотреть уведомления");
+    console.log("18. Просмотреть историю");
 
     this.rl.question("Выберите действие: ", (answer) => {
       switch (answer) {
@@ -250,6 +251,9 @@ class EditorUI {
           return;
         case "17":
           this.viewNotifications();
+          break;
+        case "18":
+          this.viewHistory();
           break;
         default:
           console.log("Неверный выбор");

@@ -1,6 +1,5 @@
 const { createClient } = require("@supabase/supabase-js");
 
-// Конфигурация Supabase
 const supabaseUrl = "https://dzgscjhkyhdammdiajaf.supabase.co";
 const supabaseKey =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR6Z3NjamhreWhkYW1tZGlhamFmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDMwMTc5NzAsImV4cCI6MjA1ODU5Mzk3MH0.2qfBFylVFD17n37M7Juvd0ytzZp7MnEWd-SQeQkdKDA";

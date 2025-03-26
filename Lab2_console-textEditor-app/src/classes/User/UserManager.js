@@ -9,7 +9,7 @@ class UserManager {
   constructor(filePath = "users.json") {
     this.filePath = filePath;
     this.users = this.loadUsers();
-    this.notifications = []; // Хранилище уведомлений
+    this.notifications = [];
     this.users.forEach((user) =>
       user.addObserver(new RoleChangeObserver(this.notifications))
     );

@@ -69,7 +69,6 @@ class DocumentManager {
           throw new Error("Неподдерживаемый формат файла в облаке");
         }
       } else {
-        // Локальное хранилище
         if (ext === "txt") {
           content = this.storage.load(path);
           type = "PlainText";
