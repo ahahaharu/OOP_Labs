@@ -4,6 +4,7 @@ const Document = require("./Document");
 const DocumentFactory = require("./DocumentFactory");
 const InsertTextCommand = require("../Commands/InsertTextCommand");
 const DocumentObserver = require("../Notifications/DocumentObserver");
+const CloudStorage = require("../Storage/CloudStorage");
 
 const fs = require("fs");
 const TxtFormat = require("../Storage/TxtFormat");
@@ -27,7 +28,11 @@ class DocumentManager {
       JSON: new JsonFormat(),
       XML: new XmlFormat(),
     };
-    this.notifications = []; // Хранилище уведомлений
+    this.notifications = [];
+  }
+
+  setStorage(storage) {
+    this.storage = storage;
   }
 
   createDocument(type) {
@@ -37,29 +42,54 @@ class DocumentManager {
     console.log(`Создан документ типа ${type}`);
   }
 
-  openDocument(path) {
+  async openDocument(path) {
     path = "docs/" + path;
     try {
       const ext = path.split(".").pop().toLowerCase();
       let content, type;
 
-      if (ext === "txt") {
-        content = this.storage.load(path);
-        type = "PlainText";
-      } else if (ext === "json") {
-        const rawData = fs.readFileSync(path, "utf8");
-        const data = JSON.parse(rawData);
-        type = data.type;
-        content = data.content;
-      } else if (ext === "xml") {
-        const rawData = fs.readFileSync(path, "utf8");
-        xml2js.parseString(rawData, (err, result) => {
-          if (err) throw err;
+      if (this.storage instanceof CloudStorage) {
+        const rawData = await this.storage.load(path);
+        if (ext === "txt") {
+          content = rawData;
+          type = "PlainText";
+        } else if (ext === "json") {
+          const data = JSON.parse(rawData);
+          type = data.type;
+          content = data.content;
+        } else if (ext === "xml") {
+          const result = await new Promise((resolve, reject) =>
+            xml2js.parseString(rawData, (err, res) =>
+              err ? reject(err) : resolve(res)
+            )
+          );
           type = result.document.$.type;
           content = result.document.content[0];
-        });
+        } else {
+          throw new Error("Неподдерживаемый формат файла в облаке");
+        }
       } else {
-        throw new Error("Неподдерживаемый формат файла");
+        // Локальное хранилище
+        if (ext === "txt") {
+          content = this.storage.load(path);
+          type = "PlainText";
+        } else if (ext === "json") {
+          const rawData = fs.readFileSync(path, "utf8");
+          const data = JSON.parse(rawData);
+          type = data.type;
+          content = data.content;
+        } else if (ext === "xml") {
+          const rawData = fs.readFileSync(path, "utf8");
+          const result = await new Promise((resolve, reject) =>
+            xml2js.parseString(rawData, (err, res) =>
+              err ? reject(err) : resolve(res)
+            )
+          );
+          type = result.document.$.type;
+          content = result.document.content[0];
+        } else {
+          throw new Error("Неподдерживаемый формат файла");
+        }
       }
 
       this.document = new Document(type, content);
@@ -69,22 +99,48 @@ class DocumentManager {
         `Открыт документ типа ${type}: ${this.document.getContent()}`
       );
     } catch (error) {
-      console.log(error.message);
+      console.log(`Ошибка открытия документа: ${error.message}`);
     }
   }
 
-  saveDocument(path, format) {
+  async saveDocument(path, format) {
     path = "docs/" + path;
     if (!this.document) {
       console.log("Нет открытого документа");
       return;
     }
-    const strategy = this.formatStrategies[format];
-    if (!strategy) {
-      console.log("Неподдерживаемый формат");
-      return;
+    if (this.storage instanceof CloudStorage) {
+      try {
+        await this.storage.save(this.document, path, format);
+      } catch (error) {
+        console.log(error.message);
+      }
+    } else {
+      const strategy = this.formatStrategies[format];
+      if (!strategy) {
+        console.log("Неподдерживаемый формат");
+        return;
+      }
+      strategy.save(this.document, path);
     }
-    strategy.save(this.document, path);
+  }
+
+  async deleteDocument(path) {
+    if (this.storage instanceof CloudStorage) {
+      try {
+        await this.storage.delete(path);
+      } catch (error) {
+        console.log(error.message);
+      }
+    } else {
+      path = "docs/" + path;
+      if (fs.existsSync(path)) {
+        fs.unlinkSync(path);
+        console.log(`Документ удалён: ${path}`);
+      } else {
+        console.log(`Файл ${path} не найден`);
+      }
+    }
   }
 
   changeDocumentType(newType) {
@@ -94,16 +150,6 @@ class DocumentManager {
     }
     this.document.setType(newType);
     console.log(`Тип документа изменён на ${newType}`);
-  }
-
-  deleteDocument(path) {
-    path = "docs/" + path;
-    if (fs.existsSync(path)) {
-      fs.unlinkSync(path);
-      console.log(`Документ удалён: ${path}`);
-    } else {
-      console.log(`Файл ${path} не найден`);
-    }
   }
 
   editDocument(position, text) {

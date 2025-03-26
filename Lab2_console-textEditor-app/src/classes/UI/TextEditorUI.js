@@ -6,6 +6,7 @@ class TextEditorUI {
   constructor(documentManager, rl) {
     this.documentManager = documentManager;
     this.rl = rl;
+    console.log("TextEditor DocumentManager: " + this.documentManager);
   }
 
   edit() {
@@ -16,7 +17,7 @@ class TextEditorUI {
 
     console.log("\nРедактируйте текст (Ctrl+X для завершения):");
 
-    let text = this.documentManager.document.getContent(); // Исходный текст
+    let text = this.documentManager.document.getContent();
     let cursorPos = text.length;
 
     process.stdin.setRawMode(true);

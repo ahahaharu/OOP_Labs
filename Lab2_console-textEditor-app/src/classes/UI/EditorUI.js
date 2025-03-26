@@ -8,6 +8,7 @@ const EditorRole = require("../User/Roles/EditorRole");
 const AdminRole = require("../User/Roles/AdminRole");
 const User = require("../User/User");
 const TextEditorUI = require("./TextEditorUI");
+const CloudStorage = require("../Storage/CloudStorage");
 
 class EditorUI {
   constructor(
@@ -329,13 +330,13 @@ class EditorUI {
     );
   }
 
-  saveDocument() {
+  async saveDocument() {
     this.rl.question("Введите путь для сохранения: ", (path) => {
       console.log("\nВыберите формат сохранения:");
       console.log("1. TXT");
       console.log("2. JSON");
       console.log("3. XML");
-      this.rl.question("Введите номер формата: ", (formatChoice) => {
+      this.rl.question("Введите номер формата: ", async (formatChoice) => {
         const formats = { 1: "TXT", 2: "JSON", 3: "XML" };
         const format = formats[formatChoice];
         if (!format) {
@@ -343,7 +344,7 @@ class EditorUI {
           this.saveDocument();
           return;
         }
-        this.documentManager.saveDocument(path, format);
+        await this.documentManager.saveDocument(path, format);
         this.pauseAndShowMenu();
       });
     });
@@ -468,9 +469,15 @@ class EditorUI {
 
   setStorage() {
     this.rl.question("Введите тип хранения (file, cloud): ", (type) => {
-      this.documentManager.storage =
-        type === "cloud" ? new CloudStorage() : new FileStorage();
-      console.log(`Установлено хранение: ${type}`);
+      if (type === "file") {
+        this.documentManager.setStorage(new FileStorage());
+        console.log("Установлено хранение: file");
+      } else if (type === "cloud") {
+        this.documentManager.setStorage(new CloudStorage());
+        console.log("Установлено хранение: cloud");
+      } else {
+        console.log("Неверный тип хранения. Доступны: file, cloud");
+      }
       this.pauseAndShowMenu();
     });
   }
@@ -480,7 +487,8 @@ class EditorUI {
     console.log("\n--- Настройки ---");
     console.log("1. Установить тему");
     console.log("2. Установить размер шрифта");
-    console.log("3. Назад");
+    console.log("3. Изменить тип хранения");
+    console.log("4. Назад");
 
     this.rl.question("Выберите действие: ", (answer) => {
       switch (answer) {
@@ -497,6 +505,9 @@ class EditorUI {
           });
           break;
         case "3":
+          this.setStorage();
+          break;
+        case "4":
           this.showMenu();
           break;
         default:
