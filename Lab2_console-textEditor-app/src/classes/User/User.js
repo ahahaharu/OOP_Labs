@@ -8,7 +8,7 @@ class User {
   }
   setRole(role) {
     this.role = role;
-    this.notifyObservers();
+    // this.notifyObservers();
   }
 }
 

@@ -31,6 +31,7 @@ class DocumentManager {
   }
 
   openDocument(path) {
+    path = "docs/" + path;
     try {
       const ext = path.split(".").pop().toLowerCase();
       let content, type;
@@ -66,6 +67,7 @@ class DocumentManager {
   }
 
   saveDocument(path, format) {
+    path = "docs/" + path;
     if (!this.document) {
       console.log("Нет открытого документа");
       return;
