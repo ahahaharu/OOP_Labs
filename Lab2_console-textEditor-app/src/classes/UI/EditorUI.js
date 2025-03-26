@@ -1,6 +1,6 @@
 const DocumentManager = require("../Document/DocumentManager");
 const SettingsManager = require("../Settings/SettingsManager");
-const FileStorage = require("../Storage/FIleStorage");
+const FileStorage = require("../Storage/FileStorage");
 const readline = require("readline");
 const UserManager = require("../User/UserManager");
 const ViewerRole = require("../User/Roles/ViewerRole");
@@ -41,7 +41,6 @@ class EditorUI {
     });
   }
 
-  // Экран входа или создания профиля
   loginOrCreate() {
     this.clearConsole();
     console.log("\n--- Вход / Создание профиля ---");
@@ -62,7 +61,6 @@ class EditorUI {
     });
   }
 
-  // Логика входа
   login() {
     this.rl.question("Введите имя пользователя: ", (name) => {
       const user = this.userManager.getUser(name);
@@ -77,7 +75,6 @@ class EditorUI {
     });
   }
 
-  // Логика создания профиля
   createProfile() {
     this.rl.question("Введите имя пользователя: ", (name) => {
       if (this.userManager.getUser(name)) {
@@ -107,7 +104,6 @@ class EditorUI {
             return;
         }
         const user = new User(name, userRole);
-        // user.addObserver(new RoleChangeObserver());
         this.userManager.addUser(user);
         this.user = user;
         console.log(`Профиль создан и вход выполнен: ${name} с ролью ${role}`);
@@ -116,7 +112,6 @@ class EditorUI {
     });
   }
 
-  // Основное меню
   showMenu() {
     this.clearConsole();
     console.log(`\n--- Меню (Пользователь: ${this.user.name}) ---`);
@@ -148,6 +143,7 @@ class EditorUI {
     console.log("14. Настройки");
     console.log("15. Выйти из профиля");
     console.log("16. Выйти из приложения");
+    console.log("17. Посмотреть уведомления");
 
     this.rl.question("Выберите действие: ", (answer) => {
       switch (answer) {
@@ -251,6 +247,9 @@ class EditorUI {
           console.log("До свидания!");
           this.rl.close();
           return;
+        case "17":
+          this.viewNotifications();
+          break;
         default:
           console.log("Неверный выбор");
           this.pauseAndShowMenu();
@@ -459,7 +458,6 @@ class EditorUI {
             return;
         }
         const user = new User(name, userRole);
-        // user.addObserver(new RoleChangeObserver());
         this.userManager.addUser(user);
         this.user = user;
         console.log(`Установлен пользователь: ${name} с ролью ${role}`);
@@ -647,6 +645,23 @@ class EditorUI {
     this.rl.question("Нажмите Enter, чтобы продолжить...", () => {
       this.manageUsers();
     });
+  }
+
+  viewNotifications() {
+    this.clearConsole();
+    console.log("\n--- Уведомления ---");
+    const docNotifications = this.documentManager.getNotifications();
+    const userNotifications = this.userManager.getNotifications();
+    const allNotifications = [...docNotifications, ...userNotifications];
+
+    if (allNotifications.length === 0) {
+      console.log("Нет уведомлений");
+    } else {
+      allNotifications.forEach((notification, index) => {
+        console.log(`${index + 1}. ${notification.toString()}`);
+      });
+    }
+    this.pauseAndShowMenu();
   }
 }
 

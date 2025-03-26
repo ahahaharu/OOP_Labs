@@ -6,5 +6,9 @@
   {
     "name": "editor",
     "role": "EditorRole"
+  },
+  {
+    "name": "viewer",
+    "role": "ViewerRole"
   }
 ]

@@ -3,6 +3,7 @@ const UndoRedoManager = require("../Utils/UndoRedoManager");
 const Document = require("./Document");
 const DocumentFactory = require("./DocumentFactory");
 const InsertTextCommand = require("../Commands/InsertTextCommand");
+const DocumentObserver = require("../Notifications/DocumentObserver");
 
 const fs = require("fs");
 const TxtFormat = require("../Storage/TxtFormat");
@@ -26,12 +27,13 @@ class DocumentManager {
       JSON: new JsonFormat(),
       XML: new XmlFormat(),
     };
+    this.notifications = []; // Хранилище уведомлений
   }
 
   createDocument(type) {
     this.document = DocumentFactory.createDocument(type);
     this.editor = new TextEditor(this.document);
-    // this.document.addObserver(new DocumentObserver());
+    this.document.addObserver(new DocumentObserver(this.notifications));
     console.log(`Создан документ типа ${type}`);
   }
 
@@ -62,7 +64,7 @@ class DocumentManager {
 
       this.document = new Document(type, content);
       this.editor = new TextEditor(this.document);
-      // this.document.addObserver({ update: () => console.log(`Документ обновлён: ${this.document.getFormattedContent()}`) });
+      this.document.addObserver(new DocumentObserver(this.notifications));
       console.log(
         `Открыт документ типа ${type}: ${this.document.getContent()}`
       );
@@ -219,6 +221,10 @@ class DocumentManager {
         }`
       );
     });
+  }
+
+  getNotifications() {
+    return this.notifications;
   }
 }
 

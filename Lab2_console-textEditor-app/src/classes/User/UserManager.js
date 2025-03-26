@@ -3,11 +3,16 @@ const User = require("./User");
 const ViewerRole = require("./Roles/ViewerRole");
 const EditorRole = require("./Roles/EditorRole");
 const AdminRole = require("./Roles/AdminRole");
+const RoleChangeObserver = require("../Notifications/RoleChangeObserver");
 
 class UserManager {
   constructor(filePath = "users.json") {
     this.filePath = filePath;
     this.users = this.loadUsers();
+    this.notifications = []; // Хранилище уведомлений
+    this.users.forEach((user) =>
+      user.addObserver(new RoleChangeObserver(this.notifications))
+    );
   }
 
   loadUsers() {
@@ -30,7 +35,6 @@ class UserManager {
             throw new Error("Неверная роль в JSON");
         }
         const user = new User(userData.name, role);
-        // user.addObserver(new RoleChangeObserver());
         return user;
       });
     }
@@ -50,8 +54,13 @@ class UserManager {
   }
 
   addUser(user) {
+    user.addObserver(new RoleChangeObserver(this.notifications));
     this.users.push(user);
     this.saveUsers();
+  }
+
+  getNotifications() {
+    return this.notifications;
   }
 }
 

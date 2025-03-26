@@ -44,6 +44,7 @@ class Document {
       this.content = content;
     }
     this.history.push({ timestamp: Date.now(), content: this.getContent() });
+    this.notifyObservers(`Содержимое изменено на: "${content}"`);
   }
 
   setType(type) {
@@ -59,10 +60,10 @@ class Document {
         },
       ];
     } else {
-      this.content = this.getContent(); // Преобразуем RichText обратно в строку
+      this.content = this.getContent();
     }
     this.type = type;
-    // this.notifyObservers();
+    this.notifyObservers(`Тип документа изменён на: ${type}`);
   }
 
   getFormattedContent() {
@@ -75,6 +76,10 @@ class Document {
 
   addObserver(observer) {
     this.observers.push(observer);
+  }
+
+  notifyObservers(message) {
+    this.observers.forEach((observer) => observer.update(message));
   }
 
   getHistory() {
@@ -119,6 +124,10 @@ class Document {
           ]
         : []),
     ].filter((segment) => segment.text.length > 0);
+    this.history.push({ timestamp: Date.now(), content: this.getContent() });
+    this.notifyObservers(
+      `Применено форматирование: ${style} на позиции ${start}-${start + length}`
+    );
   }
 
   applyColor(start, length, color) {
@@ -128,6 +137,10 @@ class Document {
     const colored = fullText.slice(start, start + length);
     const after = fullText.slice(start + length);
     this.content = `${before}[${color}]${colored}[/${color}]${after}`;
+    this.history.push({ timestamp: Date.now(), content: this.getContent() });
+    this.notifyObservers(
+      `Применён цвет ${color} на позиции ${start}-${start + length}`
+    );
   }
 }
 
