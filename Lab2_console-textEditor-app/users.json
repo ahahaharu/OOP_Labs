@@ -1,0 +1,14 @@
+[
+  {
+    "name": "haru",
+    "role": "AdminRole"
+  },
+  {
+    "name": "editor",
+    "role": "EditorRole"
+  },
+  {
+    "name": "viewer",
+    "role": "ViewerRole"
+  }
+]
