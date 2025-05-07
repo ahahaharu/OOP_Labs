@@ -14,7 +14,6 @@ class QuoteApiAdapter {
 
       const data = await response.json();
 
-      // The API returns an array with a single quote object
       if (data && data.length > 0) {
         const quoteData = data[0];
         return new QuoteDTO(quoteData.quote, quoteData.author);

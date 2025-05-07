@@ -22,7 +22,6 @@ class StudentService {
       student.validate();
       const savedStudent = this.studentRepository.addStudent(student);
 
-      // Get a motivational quote after adding a student
       const quote = await this.quoteService.getRandomQuote();
 
       return {
