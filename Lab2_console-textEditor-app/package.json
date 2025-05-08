@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@supabase/storage-js": "^2.7.3",
     "@supabase/supabase-js": "^2.49.3",
     "xml2js": "^0.6.2"
   },
